@@ -1,10 +1,18 @@
 import React from "react";
+import Slider from "../../components/slider/Slider";
+import "./Home.scss";
+import HomeInfoBox from "./HomeInfoBox";
 
 const Home = () => {
   return (
-    <div>
-      <h1>Home Page!!!</h1>
-    </div>
+    <>
+      <Slider />
+      <section>
+        <div className="container">
+          <HomeInfoBox />
+        </div>
+      </section>
+    </>
   );
 };
 
