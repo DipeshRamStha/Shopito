@@ -63,6 +63,58 @@ const registerUser = asyncHandler(async (req, res) => {
   res.send("Register User...");
 });
 
+// Login User
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate Request
+  if (!email || !password) {
+    res.status(400);
+    throw new Error("Please add email and password");
+  }
+  // Check if user exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(400);
+    throw new Error("User does not exist.");
+  }
+
+  // User exists, check if password is correct
+  const passwordIsCorrect = await bcrypt.compare(password, user.password);
+
+  // Generate Token
+  const token = generateToken(user._id);
+  if (user && passwordIsCorrect) {
+    const newUser = await User.findOne({ email }).select("-password");
+    res.cookie("token", token, {
+      path: "/",
+      httpOnly: true,
+      expires: new Date(Date.now() + 1000 * 86400),
+      // secure: true,
+      // samesite: none,
+    });
+    // Send user data
+    res.status(201).json(newUser);
+  } else {
+    res.status(400);
+    throw new Error("Invalid email or password");
+  }
+});
+
+// Logout user
+const logout = asyncHandler(async (req, res) => {
+  res.cookie("token", "", {
+    path: "/",
+    httpOnly: true,
+    expires: new Date(0),
+    // secure: true,
+    // samesite: none,
+  });
+  res.status(200).json({ message: "Successfully Logged Out" });
+});
+
 module.exports = {
   registerUser,
+  loginUser,
+  logout,
 };
