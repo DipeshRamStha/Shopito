@@ -113,8 +113,37 @@ const logout = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Successfully Logged Out" });
 });
 
+// Get User
+const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  if (user) {
+    res.status(200).json(user);
+  } else {
+    res.status(400);
+    throw new Error("User Not Found");
+  }
+});
+
+// Get Login Status
+const getLoginStatus = asyncHandler(async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.json(false);
+  }
+
+  // Verify Token
+  const verified = jwt.verify(token, process.env.JWT_SECRET);
+  if (verified) {
+    res.json(true);
+  } else {
+    res.json(false);
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
   logout,
+  getUser,
+  getLoginStatus,
 };
