@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Profile.scss";
 import PageMenu from "../../components/pageMenu/PageMenu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Card from "../../components/card/Card";
+import { getUser, updateUser } from "../../redux/features/auth/authSlice";
+import Loader from "../../components/loader/Loader";
 
 const Profile = () => {
   const { isLoading, user } = useSelector((state) => state.auth);
@@ -14,13 +16,50 @@ const Profile = () => {
     address: user?.address || {},
   };
   const [profile, setProfile] = useState(initialState);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (user === null) {
+      dispatch(getUser());
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        role: user?.role || "",
+        address: user?.address || {},
+      });
+    }
+  }, [dispatch, user]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfile({ ...profile, [name]: value });
+  };
 
   const handleImageChange = () => {};
-  const handleInputChange = () => {};
-  const saveProfile = async () => {};
+
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    const userData = {
+      name: profile.name,
+      phone: profile.phone,
+      address: {
+        address: profile.address,
+        state: profile.state,
+        country: profile.country,
+      },
+    };
+    await dispatch(updateUser(userData));
+  };
   return (
     <>
       <section>
+        {isLoading && <Loader />}
         <div className="container">
           <PageMenu />
           <h2>Profile</h2>
@@ -48,6 +87,7 @@ const Profile = () => {
                         name="name"
                         value={profile?.name}
                         onChange={handleInputChange}
+                        required
                       />
                     </p>
                     <p>
@@ -67,6 +107,7 @@ const Profile = () => {
                         name="phone"
                         value={profile?.phone}
                         onChange={handleInputChange}
+                        required
                       />
                     </p>
                     <p>
@@ -76,6 +117,7 @@ const Profile = () => {
                         name="address"
                         value={profile?.address?.address}
                         onChange={handleInputChange}
+                        required
                       />
                     </p>
                     <p>
@@ -85,6 +127,7 @@ const Profile = () => {
                         name="state"
                         value={profile?.address?.state}
                         onChange={handleInputChange}
+                        required
                       />
                     </p>
                     <p>
@@ -94,6 +137,7 @@ const Profile = () => {
                         name="country"
                         value={profile?.address?.country}
                         onChange={handleInputChange}
+                        required
                       />
                     </p>
                     <button className="--btn --btn-primary --btn-block">
