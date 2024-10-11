@@ -3,8 +3,19 @@ import "./Profile.scss";
 import PageMenu from "../../components/pageMenu/PageMenu";
 import { useDispatch, useSelector } from "react-redux";
 import Card from "../../components/card/Card";
-import { getUser, updateUser } from "../../redux/features/auth/authSlice";
+import {
+  getUser,
+  updatePhoto,
+  updateUser,
+} from "../../redux/features/auth/authSlice";
 import Loader from "../../components/loader/Loader";
+import { AiOutlineCloudUpload } from "react-icons/ai";
+import { toast } from "react-toastify";
+import { shortenText } from "../../utils";
+
+const cloud_name = process.env.REACT_APP_CLOUD_NAME;
+const upload_preset = process.env.REACT_APP_UPLOAD_PRESET;
+const url = "https://api.cloudinary.com/v1_1/dmra4h8p4/image/upload";
 
 const Profile = () => {
   const { isLoading, user } = useSelector((state) => state.auth);
@@ -13,9 +24,16 @@ const Profile = () => {
     email: user?.email || "",
     phone: user?.phone || "",
     role: user?.role || "",
-    address: user?.address || {},
+    photo: user?.photo || "",
+    address: {
+      address: user?.address?.address || "",
+      state: user?.address?.state || "",
+      country: user?.address?.country || "",
+    },
   };
   const [profile, setProfile] = useState(initialState);
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -31,7 +49,12 @@ const Profile = () => {
         email: user?.email || "",
         phone: user?.phone || "",
         role: user?.role || "",
-        address: user?.address || {},
+        photo: user?.photo || "",
+        address: {
+          address: user?.address?.address || "",
+          state: user?.address?.state || "",
+          country: user?.address?.country || "",
+        },
       });
     }
   }, [dispatch, user]);
@@ -41,7 +64,10 @@ const Profile = () => {
     setProfile({ ...profile, [name]: value });
   };
 
-  const handleImageChange = () => {};
+  const handleImageChange = (e) => {
+    setProfileImage(e.target.files[0]);
+    setImagePreview(URL.createObjectURL(e.target.files[0]));
+  };
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -56,6 +82,39 @@ const Profile = () => {
     };
     await dispatch(updateUser(userData));
   };
+
+  const savePhoto = async (e) => {
+    e.preventDefault();
+    let imageURL;
+    try {
+      if (
+        profileImage !== null &&
+        (profileImage.type === "image/jpeg" ||
+          profileImage.type === "image/jpg" ||
+          profileImage.type === "image/png")
+      ) {
+        const image = new FormData();
+        image.append("file", profileImage);
+        image.append("cloud_name", cloud_name);
+        image.append("upload_preset", upload_preset);
+
+        // Save image to cloudinary
+        const response = await fetch(url, { method: "post", body: image });
+        const imgData = await response.json();
+        // console.log(imgData);
+        imageURL = imgData.url.toString();
+      }
+      // save image to mongoDB
+      const userData = {
+        photo: profileImage ? imageURL : profile.photo,
+      };
+      await dispatch(updatePhoto(userData));
+      setImagePreview(null);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <>
       <section>
@@ -68,7 +127,24 @@ const Profile = () => {
               {!isLoading && (
                 <>
                   <div className="profile-photo">
-                    <h2>Profile Image</h2>
+                    <div>
+                      <img
+                        src={imagePreview === null ? user?.photo : imagePreview}
+                        alt="profile"
+                      />
+                      <h3>Role: {profile.role}</h3>
+                      {imagePreview !== null && (
+                        <div className="--center-all">
+                          <button
+                            className="--btn --btn-secondary"
+                            onClick={savePhoto}
+                          >
+                            <AiOutlineCloudUpload size={18} />
+                            Upload Photo
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <form onSubmit={saveProfile}>
                     <p>
@@ -154,4 +230,11 @@ const Profile = () => {
   );
 };
 
+export const UserName = () => {
+  const { user } = useSelector((state) => state.auth);
+  const username = user?.name || "...";
+  return (
+    <span style={{ color: "#ff7722" }}>Hi, {shortenText(username, 9)} | </span>
+  );
+};
 export default Profile;
