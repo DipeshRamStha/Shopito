@@ -47,7 +47,57 @@ const getOrders = asyncHandler(async (req, res) => {
   return res.status(200).json(orders);
 });
 
+// Get Single Order
+const getOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  if (req.user.role === "admin") {
+    return res.status(200).json(order);
+  }
+
+  // Match order to user
+  if (order.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error("User not authorized to view order");
+  }
+  res.status(200).json(order);
+});
+
+// Update Order status
+const updateOrderStatus = asyncHandler(async (req, res) => {
+  const { orderStatus } = req.body;
+  const { id } = req.params;
+
+  const order = await Order.findById(id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  // Update the order status
+  await Order.findByIdAndUpdate(
+    { _id: id },
+    {
+      orderStatus,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({ message: "Order status updated" });
+});
+
 module.exports = {
   createOrder,
   getOrders,
+  getOrder,
+  updateOrderStatus,
 };
