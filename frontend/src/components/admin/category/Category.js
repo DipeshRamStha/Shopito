@@ -6,15 +6,10 @@ import { getCategories } from "../../../redux/features/categoryAndBrand/category
 import { useDispatch } from "react-redux";
 
 const Category = () => {
-  const dispatch = useDispatch();
-
-  const reloadCategory = () => {
-    dispatch(getCategories());
-  };
   return (
     <section>
       <div className="container coupon">
-        <CreateCategory reloadCategory={reloadCategory} />
+        <CreateCategory />
         <CategoryList />
       </div>
     </section>

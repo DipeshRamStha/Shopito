@@ -9,7 +9,7 @@ import {
 } from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
 import { toast } from "react-toastify";
 
-const CreateBrand = ({ reloadBrands }) => {
+const CreateBrand = () => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const { isLoading, categories } = useSelector((state) => state.category);
@@ -32,10 +32,9 @@ const CreateBrand = ({ reloadBrands }) => {
       name,
       category,
     };
-    dispatch(createBrand(formData));
-    dispatch(getBrands());
+    await dispatch(createBrand(formData));
+    await dispatch(getBrands());
     setName("");
-    reloadBrands();
   };
 
   return (

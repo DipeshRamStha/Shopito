@@ -10,7 +10,6 @@ const {
 // routes
 router.post("/createBrand", protect, adminOnly, createBrand);
 router.get("/getBrands", protect, adminOnly, getBrands);
-// personally I feel router.get must be router.delete for deletion operation but the tutorial does router.get only
-router.get("/:slug", protect, adminOnly, deleteBrand);
+router.delete("/:slug", protect, adminOnly, deleteBrand);
 
 module.exports = router;

@@ -6,14 +6,10 @@ import { useDispatch } from "react-redux";
 import { getBrands } from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
 
 const Brand = () => {
-  const dispatch = useDispatch();
-  const reloadBrands = () => {
-    dispatch(getBrands());
-  };
   return (
     <section>
       <div className="container coupon">
-        <CreateBrand reloadBrands={reloadBrands} />
+        <CreateBrand />
         <BrandList />
       </div>
     </section>

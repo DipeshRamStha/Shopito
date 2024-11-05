@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getBrands } from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
+import {
+  deleteBrand,
+  getBrands,
+} from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
 import { FaTrashAlt } from "react-icons/fa";
 import { confirmAlert } from "react-confirm-alert"; // Import
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import CSS
@@ -30,7 +33,10 @@ const BrandList = () => {
     });
   };
 
-  const delBrand = async (slug) => {};
+  const delBrand = async (slug) => {
+    await dispatch(deleteBrand(slug));
+    await dispatch(getBrands());
+  };
 
   return (
     <div className="--mb2">
