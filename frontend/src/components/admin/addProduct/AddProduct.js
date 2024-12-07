@@ -3,7 +3,12 @@ import "./AddProduct.scss";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../../loader/Loader";
 import ProductForm from "../productForm/ProductForm";
-import { getCategories } from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
+import {
+  getBrands,
+  getCategories,
+} from "../../../redux/features/categoryAndBrand/categoryAndBrandSlice";
+import { createProduct } from "../../../redux/features/product/productSlice";
+import { useNavigate } from "react-router-dom";
 
 const initialState = {
   name: "",
@@ -17,7 +22,9 @@ const initialState = {
 
 const AddProduct = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(initialState);
+  const [description, setDescription] = useState("");
   const [filteredBrands, setFilteredBrands] = useState([]);
 
   const { isLoading } = useSelector((state) => state.product);
@@ -28,6 +35,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     dispatch(getCategories());
+    dispatch(getBrands());
   }, [dispatch]);
 
   // Filter Brands based on selectedCategory
@@ -46,9 +54,32 @@ const AddProduct = () => {
     setProduct({ ...product, [name]: value });
   };
 
+  const generateSKU = (category) => {
+    const letter = category.slice(0, 3).toUpperCase();
+    const number = Date.now();
+    const sku = letter + "-" + number;
+    return sku;
+  };
+
   const saveProduct = async (e) => {
     e.preventDefault();
-    console.log(product);
+
+    const formData = {
+      name,
+      sku: generateSKU(category),
+      category,
+      brand,
+      color,
+      quantity: Number(quantity),
+      regularPrice,
+      price,
+      description,
+      // images
+    };
+    // console.log(formData);
+    await dispatch(createProduct(formData));
+
+    // navigate("/admin/all-products");
   };
 
   return (
@@ -63,6 +94,8 @@ const AddProduct = () => {
           categories={categories}
           isEditing={false}
           filteredBrands={filteredBrands}
+          description={description}
+          setDescription={setDescription}
         />
       </div>
     </section>
