@@ -25,6 +25,7 @@ const AddProduct = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(initialState);
   const [description, setDescription] = useState("");
+  const [files, setFiles] = useState([]);
   const [filteredBrands, setFilteredBrands] = useState([]);
 
   const { isLoading } = useSelector((state) => state.product);
@@ -96,6 +97,8 @@ const AddProduct = () => {
           filteredBrands={filteredBrands}
           description={description}
           setDescription={setDescription}
+          files={files}
+          setFiles={setFiles}
         />
       </div>
     </section>
