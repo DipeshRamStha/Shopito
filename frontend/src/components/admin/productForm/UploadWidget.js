@@ -1,10 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import Card from "../../card/Card";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { BsTrash } from "react-icons/bs";
 
 const UploadWidget = () => {
-  const addImages = () => {};
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [images, setImages] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+
+  const addImages = (e) => {
+    const selectedFiles = e.target.files;
+    const selectedFilesArray = Array.from(selectedFiles);
+
+    const imagesArray = selectedFilesArray.map((file) => {
+      return URL.createObjectURL(file);
+    });
+    setImages((prevImages) => prevImages.concat(selectedFilesArray));
+    setSelectedImages((prevImages) => prevImages.concat(imagesArray));
+
+    e.target.value = "";
+  };
+
+  const removeImage = (image) => {
+    const imageIndex = selectedImages.indexOf(image);
+    setSelectedImages(selectedImages.filter((img) => img !== image));
+    setImages(images.filter((img, index) => index !== imageIndex));
+    URL.revokeObjectURL(image);
+  };
+
   return (
     <div>
       <Card cardClass={"formcard group"}>
@@ -20,6 +44,38 @@ const UploadWidget = () => {
             accept="image/png, image/jpeg, image/webp"
           />
         </label>
+        <br />
+        {selectedImages.length > 0 &&
+          (selectedImages.length > 5 ? (
+            <p className="error">
+              You can't upload more than 5 images !
+              <br />
+              <span>
+                Please remove <b>{selectedImages.length - 5}</b> of them
+              </span>
+            </p>
+          ) : (
+            <div className="--center-all">
+              <button className="--btn --btn-danger --btn-large">
+                Upload Image
+              </button>
+            </div>
+          ))}
+        {/* View Selected Images */}
+        <div className={selectedImages.length > 0 ? "images" : ""}>
+          {selectedImages !== 0 &&
+            selectedImages.map((image, index) => {
+              return (
+                <div key={image} className="image">
+                  <img src={image} alt="productImage" width={200} />
+                  <button className="-btn" onClick={() => removeImage(image)}>
+                    <BsTrash size={25} />
+                  </button>
+                  <p>{index + 1}</p>
+                </div>
+              );
+            })}
+        </div>
       </Card>
     </div>
   );
