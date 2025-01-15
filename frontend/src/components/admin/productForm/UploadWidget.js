@@ -3,6 +3,9 @@ import Card from "../../card/Card";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { BsTrash } from "react-icons/bs";
 
+const upload_preset = process.env.REACT_APP_UPLOAD_PRESET;
+const url = "https://api.cloudinary.com/v1_1/dmra4h8p4/image/upload";
+
 const UploadWidget = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [images, setImages] = useState([]);
@@ -27,6 +30,30 @@ const UploadWidget = () => {
     setSelectedImages(selectedImages.filter((img) => img !== image));
     setImages(images.filter((img, index) => index !== imageIndex));
     URL.revokeObjectURL(image);
+  };
+
+  const uploadImages = () => {
+    setUploading(true);
+    let imageUrls = [];
+
+    const formData = new FormData();
+    for (let i = 0; i < images.length; i++) {
+      let file = images[i];
+      formData.append("file", file);
+      formData.append("upload_preset", upload_preset);
+      formData.append("folder", "shopitoApp");
+
+      fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          imageUrls.push(data.secure_url);
+        });
+    }
   };
 
   return (
@@ -56,7 +83,10 @@ const UploadWidget = () => {
             </p>
           ) : (
             <div className="--center-all">
-              <button className="--btn --btn-danger --btn-large">
+              <button
+                className="--btn --btn-danger --btn-large"
+                onClick={uploadImages}
+              >
                 Upload Image
               </button>
             </div>
