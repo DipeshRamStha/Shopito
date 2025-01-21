@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import Card from "../../card/Card";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { BsTrash } from "react-icons/bs";
+import { toast } from "react-toastify";
 
 const upload_preset = process.env.REACT_APP_UPLOAD_PRESET;
 const url = "https://api.cloudinary.com/v1_1/dmra4h8p4/image/upload";
 
-const UploadWidget = () => {
+const UploadWidget = ({ files, setFiles }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [images, setImages] = useState([]);
   const [progress, setProgress] = useState(0);
@@ -52,6 +53,14 @@ const UploadWidget = () => {
         })
         .then((data) => {
           imageUrls.push(data.secure_url);
+          setProgress(imageUrls.length);
+
+          if (imageUrls.length === images.length) {
+            setFiles((prevFiles) => prevFiles.concat(imageUrls));
+            setUploading(false);
+            console.log(files);
+            toast.success("Image upload complete.");
+          }
         });
     }
   };
