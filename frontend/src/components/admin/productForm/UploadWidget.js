@@ -52,6 +52,7 @@ const UploadWidget = ({ files, setFiles }) => {
           return response.json();
         })
         .then((data) => {
+          console.log(data);
           imageUrls.push(data.secure_url);
           setProgress(imageUrls.length);
 
@@ -60,7 +61,15 @@ const UploadWidget = ({ files, setFiles }) => {
             setUploading(false);
             console.log(files);
             toast.success("Image upload complete.");
+            setImages([]);
+            setSelectedImages([]);
+            setProgress(0);
           }
+        })
+        .catch((error) => {
+          setUploading(false);
+          toast.error(error.message);
+          console.log(error);
         });
     }
   };
@@ -94,9 +103,10 @@ const UploadWidget = ({ files, setFiles }) => {
             <div className="--center-all">
               <button
                 className="--btn --btn-danger --btn-large"
+                disabled={uploading}
                 onClick={uploadImages}
               >
-                Upload Image
+                {uploading ? `` : ``}
               </button>
             </div>
           ))}
